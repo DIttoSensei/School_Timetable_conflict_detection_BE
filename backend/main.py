@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
@@ -10,6 +10,8 @@ DATABASE_URL = "sqlite:///./database.db"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+API_SECRET_KEY = "aSdyu678GTFDnJ9oLsTuhbDmlat2TT7fs"
+
 
 def get_db():
     db = SessionLocal()
@@ -59,8 +61,14 @@ TIME_SLOTS = [
               ]
 
 
+async def verify_api_key (x_api_key : str = Header(None)):
+    if x_api_key != API_SECRET_KEY:
+        raise HTTPException(status_code=401, detail="Access Denied: Invalid Key")
+    
+
+
 @app.put("/generate/", response_model=list[CourseItems])
-async def generate_timetable(db: Session = Depends(get_db)):
+async def generate_timetable(db: Session = Depends(get_db), _ = Depends(verify_api_key)):
     all_courses = db.query(CourseItemDB).all()
     number_of_course_to_edit = random.randint(3,9)
     random_selected = random.sample(all_courses, number_of_course_to_edit)
@@ -76,13 +84,13 @@ async def generate_timetable(db: Session = Depends(get_db)):
 
 
 @app.get("/courses/", response_model=list[CourseItems])
-async def get_all_course(db: Session = Depends(get_db)):
+async def get_all_course(db: Session = Depends(get_db), _ = Depends(verify_api_key)):
     course = db.query(CourseItemDB).all()
     return course
 
 
 @app.get("/courses/{day_of_the_week}", response_model= list[CourseItems])
-async def get_specific_day_course(day_of_the_week : str, db: Session = Depends(get_db)):
+async def get_specific_day_course(day_of_the_week : str, db: Session = Depends(get_db), _ = Depends(verify_api_key)):
     monday_course = db.query(CourseItemDB).filter(CourseItemDB.day_of_the_week == day_of_the_week).all()
     if monday_course is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -97,7 +105,7 @@ def time_to_min (time_str : str) -> int:
 
 
 @app.put("/resolve/", response_model=list[CourseItems])
-async def fix_all_course_time(db: Session = Depends(get_db)):
+async def fix_all_course_time(db: Session = Depends(get_db), _ = Depends(verify_api_key)):
     DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
     for day in DAYS_OF_WEEK:
