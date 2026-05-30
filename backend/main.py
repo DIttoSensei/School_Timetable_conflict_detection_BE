@@ -10,7 +10,7 @@ DATABASE_URL = "sqlite:///./database.db"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-API_SECRET_KEY = "aSdyu678GTFDnJ9oLsTuhbDmlat2TT7fs"
+API_SECRET_KEY = "" # Set your API secret key here eg 'aSdyu678GTFDnJ9oLsTuhbDmlat2TT7fs'
 
 
 def get_db():
