@@ -8,13 +8,20 @@ git clone https://github.com/DIttoSensei/School_Timetable_conflict_detection_BE.
 
 ## STEP TWO
 - Create a virtual envirionment [venv]
+```
+python -m venv venv
+```
+- Activate environment
+```
+venv/Scripts/activate
+```
 - After creating, install required packages from requirements.txt
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## STEP THREE
-- To run backend type:
+- To run the backend type:
 ```
 fastapi dev
 ```
